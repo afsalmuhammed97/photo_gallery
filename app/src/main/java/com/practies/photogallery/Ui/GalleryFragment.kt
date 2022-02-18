@@ -18,6 +18,10 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 
+
+
+
+@AndroidEntryPoint
 class GalleryFragment : Fragment() {
     private  var _binding:FragmentGalleryBinding?=null
     private val binding  get() = _binding!!
@@ -42,7 +46,9 @@ class GalleryFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-           viewModel=ViewModelProvider(this).get(ImagesViewModel::class.java)
+//           viewModel=ViewModelProvider(this).get(ImagesViewModel::class.java)
+        imageAdapter= ImagePagingAdapter()
+        viewModel = ViewModelProvider(this).get(ImagesViewModel::class.java)
 
                   loadData()
 
@@ -53,14 +59,16 @@ class GalleryFragment : Fragment() {
               lifecycleScope.launch {
                   viewModel.listData.collect{      pagingData->
                       imageAdapter.submitData(pagingData)
-
                       setUpView()
+
+
+
                   }
               }
           }
 
     private fun setUpView(){
-        imageAdapter= ImagePagingAdapter()
+
         binding.imageRv.apply {
             layoutManager = LinearLayoutManager(context)
             adapter=imageAdapter

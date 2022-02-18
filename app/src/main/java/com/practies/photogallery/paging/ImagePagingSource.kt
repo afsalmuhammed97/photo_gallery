@@ -1,5 +1,7 @@
 package com.practies.photogallery.paging
 
+import android.util.Log
+import android.widget.Toast
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.practies.photogallery.api.ApiService
@@ -20,6 +22,8 @@ class ImagePagingSource(private val apiService: ApiService): PagingSource<Int, I
         return  try {
             val currentPage=params.key?:1
             val response=apiService.getImages(currentPage)
+            Log.i("TAG", response.body()!!.imageResult[2].toString())
+
             val data= response.body()?.imageResult?: emptyList()
             val responseData= mutableListOf<ImageData>()
 
