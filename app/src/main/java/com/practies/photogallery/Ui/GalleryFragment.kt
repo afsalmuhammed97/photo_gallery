@@ -1,14 +1,19 @@
 package com.practies.photogallery.Ui
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.practies.photogallery.R
+import com.practies.photogallery.Utill.OnItemClickListener
 import com.practies.photogallery.adapter.ImagePagingAdapter
 import com.practies.photogallery.databinding.FragmentGalleryBinding
 import com.practies.photogallery.viewModels.ImagesViewModel
@@ -22,12 +27,12 @@ import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
-class GalleryFragment : Fragment() {
+class GalleryFragment : Fragment(),OnItemClickListener {
     private  var _binding:FragmentGalleryBinding?=null
     private val binding  get() = _binding!!
 
     private lateinit var imageAdapter: ImagePagingAdapter
-    private lateinit var viewModel: ImagesViewModel
+    private  val viewModel by activityViewModels<ImagesViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,10 +52,11 @@ class GalleryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 //           viewModel=ViewModelProvider(this).get(ImagesViewModel::class.java)
-        imageAdapter= ImagePagingAdapter()
-        viewModel = ViewModelProvider(this).get(ImagesViewModel::class.java)
 
-                  loadData()
+
+        setUpView()
+
+        loadData()
 
     }
 
@@ -58,8 +64,8 @@ class GalleryFragment : Fragment() {
 
               lifecycleScope.launch {
                   viewModel.listData.collect{      pagingData->
+
                       imageAdapter.submitData(pagingData)
-                      setUpView()
 
 
 
@@ -68,12 +74,16 @@ class GalleryFragment : Fragment() {
           }
 
     private fun setUpView(){
-
+        imageAdapter= ImagePagingAdapter(this)
         binding.imageRv.apply {
-            layoutManager = LinearLayoutManager(context)
+            layoutManager =StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL)                     // LinearLayoutManager(context)
             adapter=imageAdapter
         }
 
+    }
+
+    override fun onItemClick(position: Int) {
+        findNavController().navigate(R.id.action_galleryFragment_to_imagDetailsFragment)
     }
 
 }

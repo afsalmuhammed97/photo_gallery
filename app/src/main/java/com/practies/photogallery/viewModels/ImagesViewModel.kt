@@ -1,5 +1,6 @@
 package com.practies.photogallery.viewModels
 
+import android.media.Image
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
@@ -12,9 +13,14 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class ImagesViewModel @Inject constructor(private val apiService: ApiService):ViewModel(){
-
-    val listData=Pager(PagingConfig(pageSize = 1)){
+class ImagesViewModel
+@Inject constructor(private val apiService: ApiService):ViewModel(){
+    val listData=Pager(PagingConfig(pageSize = 30)){
         ImagePagingSource(apiService)
     }.flow.cachedIn(viewModelScope)
+
+
+
+
+
 }

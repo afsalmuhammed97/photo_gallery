@@ -1,45 +1,61 @@
 package com.practies.photogallery.paging
 
 import android.util.Log
-import android.widget.Toast
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.practies.photogallery.api.ApiService
-import com.practies.photogallery.model.ApiData
 import com.practies.photogallery.model.ImageData
-import java.lang.Exception
-import java.security.spec.ECField
 
-class ImagePagingSource(private val apiService: ApiService): PagingSource<Int, ImageData>(){
+class ImagePagingSource
+    (private val apiService: ApiService): PagingSource<Int, ImageData>(){
 
 
     override fun getRefreshKey(state: PagingState<Int, ImageData>): Int? {
-     return null
+     return  state.anchorPosition?.let { anchorPosition ->
+         state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
+             ?:state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)
+
+     }
     }
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, ImageData> {
-
+        val pageIndex=params.key?:1
         return  try {
-            val currentPage=params.key?:1
-            val response=apiService.getImages(currentPage)
-            Log.i("TAG", response.body()!!.imageResult[2].toString())
 
-            val data= response.body()?.imageResult?: emptyList()
-            val responseData= mutableListOf<ImageData>()
+                val result=apiService.getImages(pageIndex)
 
-           responseData.addAll(data)
+                val data=result.body()?:emptyList()
+
+              val responseData= mutableListOf<ImageData>()
+
+                        responseData.addAll(data)
+
+                      Log.i("TAG2",responseData.toString())
+
+
+
+            val nextKey= if (data.isEmpty()) {
+                null
+            }else{
+                pageIndex+(params.loadSize/30)
+            }
+
 
             LoadResult.Page(
-                data=responseData,
-                prevKey = if (currentPage ==1) null else  -1,
-                nextKey = currentPage.plus(1)
+
+                data= responseData,
+                prevKey = if (pageIndex ==1) null else  -1,
+                nextKey = nextKey
             )
 
 
 
 
         }catch (e:Exception){
+
+            Log.e("Exceptions",e.message.toString())
             LoadResult.Error(e)
+
         }
     }
 
